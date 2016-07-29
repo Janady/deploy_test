@@ -1,4 +1,3 @@
-# config valid only for current version of Capistrano
 lock '3.6.0'
 
 set :application, 'deploy_test'
@@ -6,6 +5,7 @@ set :repo_url, 'git@github.com:Janady/deploy_test.git'
 
 set :rbenv_type, :user # or :system, depends on your rbenv setup
 set :rbenv_ruby, '2.3.1'
+
 set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
 set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
@@ -31,7 +31,7 @@ set :migration_servers, -> { primary(fetch(:migration_role)) }
 set :conditionally_migrate, true
 
 # Defaults to [:web]
-set :assets_roles, [:web, :app]
+set :assets_roles, [:web, :app, :db]
 
 # Defaults to 'assets'
 # This should match config.assets.prefix in your rails config/application.rb
@@ -73,27 +73,27 @@ set :linked_files, fetch(:linked_files, []).push('config/database.yml', 'config/
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-namespace :deploy do
-
-  namespace :assets do
-    task :precompile do
-      on roles(fetch(:assets_roles)) do
-        within release_path do
-          with rails_env: fetch(:rails_env) do
-            execute :rake, "assets:precompile RAILS_ENV=production"
-          end
-        end
-      end
-    end
-  end
-
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      execute :touch, release_path.join('tmp/restart.txt')
-    end
-  end
-
-  after :publishing, 'deploy:restart'
-  after :finishing, 'deploy:cleanup'
-end
+# namespace :deploy do
+# 
+#   namespace :assets do
+#     task :precompile do
+#       on roles(fetch(:assets_roles)) do
+#         within release_path do
+#           with rails_env: fetch(:rails_env) do
+#             execute :rake, "assets:precompile RAILS_ENV=production"
+#           end
+#         end
+#       end
+#     end
+#   end
+# 
+#   desc 'Restart application'
+#   task :restart do
+#     on roles(:app), in: :sequence, wait: 5 do
+#       execute :touch, release_path.join('tmp/restart.txt')
+#     end
+#   end
+# 
+#   after :publishing, 'deploy:restart'
+#   after :finishing, 'deploy:cleanup'
+# end
